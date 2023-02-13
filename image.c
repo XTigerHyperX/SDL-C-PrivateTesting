@@ -38,6 +38,3 @@ void InitBG(Image *Backg){
 void ShowImg(Image I , SDL_Surface *Screen){
     SDL_BlitSurface(I.img,&I.pos2,Screen,&I.pos1);
 }
-void ShowBG(Image I , SDL_Surface *Screen){
-    SDL_BlitSurface(I.img,NULL,Screen,&I.pos1);
-}

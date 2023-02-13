@@ -12,7 +12,6 @@ int main(int argc, char **argv[]){
     int done =1;
     Image Backg , Play , Options , Exit;
 
-    SDL_Rect PositionM;
     SDL_Event event;
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -20,7 +19,7 @@ int main(int argc, char **argv[]){
     Screen = SDL_SetVideoMode(1100,600,32 ,SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     InitBG(&Backg);
-    ShowBG(Backg,Screen);    
+    ShowImg(Backg,Screen);    
 
     InitImg(&Play , 400 , 50 , "Images/Play1.png");
     ShowImg(Play,Screen); 
@@ -69,8 +68,15 @@ int main(int argc, char **argv[]){
             }
             SDL_UpdateRect(Screen,0,0,0,0);
         }
+        if (event.type == SDL_MOUSEBUTTONUP){
+            int x = event.motion.x;
+            int y = event.motion.y;
+            if (x >= Exit.pos1.x && x <= Exit.pos1.x + Exit.img->w && y >= Exit.pos1.y && y<= Exit.pos1.y + Exit.img->h){
+                SDL_Quit();
+            }
+        }
 
-        if( event.type == SDL_QUIT){
+        if(event.type == SDL_QUIT){
             break;
         }
 

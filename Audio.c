@@ -7,6 +7,4 @@ void InitAudio(){
     Mix_Music *music;
     music = Mix_LoadMUS("Images/music.mp3");
     Mix_PlayMusic(music,-1);
-
-
 }

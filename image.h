@@ -14,7 +14,6 @@ typedef struct Image Image;
 void InitBG (Image *Backg);
 void InitImg(Image * imag, int x, int y , char name[]);
 void ShowImg (Image i , SDL_Surface *Screen);
-void ShowBG (Image i , SDL_Surface *Screen);
 void InitAudio ();
 
 #endif
