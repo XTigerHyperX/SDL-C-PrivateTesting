@@ -1,0 +1,79 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_mixer.h>
+
+#include "function.h"
+
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 800
+#define TILE_SIZE 32
+
+int main(int argc, char *argv[])
+{
+    SDL_Surface *screen = NULL;
+    SDL_Surface *background_frames[9];
+    Image Backg;
+    int quit = 0;
+    Mix_Music *music;
+    int frame_index = 0;
+
+    Uint32 last_frame_time = 0;
+
+    SDL_Init(SDL_INIT_VIDEO);
+
+    screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+    if (!screen)
+    {
+        SDL_Quit();
+        return 1;
+    }
+
+    InitBG(&Backg, "Images/Main.png");
+
+    background_frames[0] = IMG_Load("Images/Main2.png");
+    background_frames[1] = IMG_Load("Images/Main3.png");
+    background_frames[2] = IMG_Load("Images/Main4.png");
+    background_frames[3] = IMG_Load("Images/Main5.png");
+    background_frames[4] = IMG_Load("Images/Main6.png");
+    background_frames[5] = IMG_Load("Images/Main7.png");
+    background_frames[6] = IMG_Load("Images/Main8.png");
+    background_frames[7] = IMG_Load("Images/Main9.png");
+    background_frames[8] = IMG_Load("Images/Main10.png");
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 2048) == -1)
+    {
+        printf("Error loading audio");
+    }
+    music = Mix_LoadMUS("Images/music.mp3");
+
+    ShowBG(Backg, screen);
+
+    Mix_PlayMusic(music, -1);
+
+    while (!quit)
+    {
+        Uint32 current_time = SDL_GetTicks();
+
+        animate(screen, background_frames, 9, &frame_index, current_time, &last_frame_time);
+        SDL_Flip(screen);
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+            {
+                quit = 1;
+            }
+        }
+
+    }
+
+    for (int i = 0; i < 9; i++)
+    {
+        SDL_FreeSurface(background_frames[i]);
+    }
+    SDL_FreeSurface(Backg.img);
+
+    SDL_Quit();
+    return 0;
+}

@@ -1,91 +1,118 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <SDL/SDL.h>
+#include <stdbool.h>
+#include <math.h>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 #include <SDL/SDL_mixer.h>
+#include "functionPerso.h"
 
-#include "image.h"
-
-int main(int argc, char **argv[]){
-    SDL_Surface *Screen =NULL;
-    SDL_Surface *menu =NULL;
-    int done =1;
-    Image Backg , Play , Options , Exit;
-
+int main(int argc, char **argv)
+{
+    TTF_Init();
+    SDL_Surface *screen;
     SDL_Event event;
+    perso p;
+    int continuer = 1, droite = 0, gauche = 0, up = 0, dir = 2;
+    Uint32 dt, t_prev;
+    text t, s;
+    Image Backg, vie;
 
+    screen = SDL_SetVideoMode(1024, 768, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
     SDL_Init(SDL_INIT_VIDEO);
+    InitBG(&Backg, "Images/Main.png");
+    initperso(&p);
+    inittext(&t, 5, 100);
+    inittext(&s, 125, 100);
 
-    Screen = SDL_SetVideoMode(1100,600,32 ,SDL_HWSURFACE | SDL_DOUBLEBUF);
-
-    InitBG(&Backg);
-    ShowImg(Backg,Screen);    
-
-    InitImg(&Play , 400 , 50 , "Images/Play1.png");
-    ShowImg(Play,Screen); 
-
-    InitImg(&Options , 400 , 200, "Images/Options1.png");
-    ShowImg(Options,Screen); 
-
-    InitImg(&Exit , 400 , 350, "Images/Exit1.png");
-    ShowImg(Exit,Screen); 
-    
-    InitAudio();
-
-    SDL_Flip(Screen); 
-    SDL_PollEvent(&event);
-    while (SDL_WaitEvent(&event))
+    while (continuer)
     {
-        if(event.type == SDL_MOUSEMOTION){
-            int x = event.motion.x;
-            int y = event.motion.y;
-
-            if (x >= Play.pos1.x && x <= Play.pos1.x + Play.img->w && y >= Play.pos1.y && y<= Play.pos1.y + Play.img->h){
-                InitImg(&Play , 400 , 50 , "Images/Play.png");
-                ShowImg(Play,Screen); 
+        t_prev = SDL_GetTicks();
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                continuer = 0;
+                break;
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_RIGHT:
+                    droite = 1;
+                    break;
+                case SDLK_LEFT:
+                    gauche = 1;
+                    break;
+                case SDLK_UP:
+                    up = 1;
+                    break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_RIGHT:
+                    droite = 0;
+                    dir = 2;
+                    p.vitesse = 0;
+                    break;
+                case SDLK_LEFT:
+                    gauche = 0;
+                    p.vitesse = 0;
+                    dir = 3;
+                    break;
+                case SDLK_UP:
+                    up = 0;
+                    break;
+                }
+                break;
             }
-            else {
-                InitImg(&Play , 400 , 50 , "Images/Play1.png");
-                ShowImg(Play,Screen); 
-            }
-
-            if (x >= Options.pos1.x && x <= Options.pos1.x + Options.img->w && y >= Options.pos1.y && y<= Options.pos1.y + Options.img->h){
-                InitImg(&Options , 400 , 200 , "Images/Options.png");
-                ShowImg(Options,Screen); 
-            }
-            else {
-                InitImg(&Options , 400 , 200 , "Images/Options1.png");
-                ShowImg(Options,Screen); 
-            }
-
-            if (x >= Exit.pos1.x && x <= Exit.pos1.x + Exit.img->w && y >= Exit.pos1.y && y<= Exit.pos1.y + Exit.img->h){
-                InitImg(&Exit , 400 , 350 , "Images/Exit.png");
-                ShowImg(Exit,Screen); 
-            }
-            else {
-                InitImg(&Exit , 400 , 350 , "Images/Exit1.png");
-                ShowImg(Exit,Screen); 
-            }
-            SDL_UpdateRect(Screen,0,0,0,0);
         }
-        if (event.type == SDL_MOUSEBUTTONUP){
-            int x = event.motion.x;
-            int y = event.motion.y;
-            if (x >= Exit.pos1.x && x <= Exit.pos1.x + Exit.img->w && y >= Exit.pos1.y && y<= Exit.pos1.y + Exit.img->h){
-                SDL_Quit();
-            }
+        if (droite == 1)
+        {
+            p.vitesse = 5;
+            p.acceleration += 0.5;
+            p.direction = 0;
         }
-
-        if(event.type == SDL_QUIT){
-            break;
+        if (gauche == 1)
+        {
+            p.vitesse = 5;
+            p.acceleration += 0.5;
+            p.direction = 1;
         }
-
+        if (up == 1)
+        {
+            saut(&p);
+        }
+        p.acceleration -= 0.3;
+        if (p.acceleration < 0)
+        {
+            p.acceleration = 0;
+        }
+        if (p.acceleration > 4)
+        {
+            p.acceleration = 4;
+        }
+        SDL_Delay(1.7);
+        dt = SDL_GetTicks() - t_prev;
+        moveperso(&p, dt);
+        animerperso(&p);
+        if ((p.vitesse == 0) && (p.acceleration == 0))
+        {
+            p.direction = dir;
+        }
+        p.position.y += p.vitesseV;
+        p.vitesseV += 10;
+        if (p.position.y >= 600)
+        {
+            p.vitesseV = 0;
+            p.position.y = 600;
+        }
+        ShowBG(Backg, screen);
+        afficherperso(p, screen);
+        displaytext(t, screen);
+        SDL_Flip(screen);
     }
-        SDL_FreeSurface(Backg.img);
-        SDL_FreeSurface(Play.img);
-        SDL_Quit();
-
-
-
-    return 0;
 }
